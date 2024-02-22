@@ -6,6 +6,7 @@
     "homepage": "https://github.com/yujiapingyu/ObsidianSearch",
     "preload": "preload.js",
     "logo": "logo.png",
+    "platform": ["win32", "darwin"],
     "features": [
       {
         "code": "obsidian_search",
@@ -14,6 +15,14 @@
           "of",
           "obsidian"
         ]
+      },
+      {
+        "code": "obsidian_setting",
+        "explain": "Obsidian 设置",
+        "cmds": [
+          "ofsetting"
+        ]
       }
+
     ]
   }
