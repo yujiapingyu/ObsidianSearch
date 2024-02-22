@@ -1,0 +1,19 @@
+{
+    "version": "1.0.6",
+    "pluginName": "Obsidian 小助手",
+    "description": "Obsidian 快速搜索并打开对应文档，需要Obsidian安装Advanced URI插件。",
+    "author": "David Fish",
+    "homepage": "https://u.tools",
+    "preload": "preload.js",
+    "logo": "logo.png",
+    "features": [
+      {
+        "code": "obsidian_search",
+        "explain": "Obsidian 搜索",
+        "cmds": [
+          "of",
+          "obsidian"
+        ]
+      }
+    ]
+  }
