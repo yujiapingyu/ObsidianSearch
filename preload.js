@@ -167,6 +167,7 @@ window.exports = {
           window.utools.outPlugin();
         });
       },
+      placeholder: "输入关键词检索文档，支持拼音"
     },
   },
 
@@ -208,6 +209,7 @@ window.exports = {
         }
         window.utools.outPlugin();
       },
+      placeholder: "输入root path，按回车确认"
     },
   },
 };
