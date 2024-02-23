@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const { pinyin } = require("pinyin-pro");
+const _ = require("lodash");
 
 const ROOT_PATH_KEY = "configRootPath";
 const NOT_FOUND_DESCRIPTION = "请尝试不同的关键词";
@@ -39,7 +40,7 @@ const buildNoteCache = () => {
           const noteName = path.basename(filePath, ".md");
           const noteDescObj = {
             title: noteName,
-            line: line.trim(),
+            line: _.trim(line, "# -"),
             lineNumber: index + 1, // 行号从1开始
             path: notePath,
             vault: vaultName,

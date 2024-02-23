@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "lodash": "^4.17.21",
     "pinyin-pro": "^3.19.5"
   }
 }
