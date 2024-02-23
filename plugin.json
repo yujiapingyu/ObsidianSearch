@@ -6,23 +6,25 @@
     "homepage": "https://github.com/yujiapingyu/ObsidianSearch",
     "preload": "preload.js",
     "logo": "logo.png",
-    "platform": ["win32", "darwin"],
+    "platform": [
+        "win32",
+        "darwin"
+    ],
     "features": [
-      {
-        "code": "obsidian_search",
-        "explain": "Obsidian 搜索",
-        "cmds": [
-          "of",
-          "obsidian"
-        ]
-      },
-      {
-        "code": "obsidian_setting",
-        "explain": "Obsidian 设置",
-        "cmds": [
-          "ofsetting"
-        ]
-      }
-
+        {
+            "code": "obsidian_search",
+            "explain": "Obsidian 搜索",
+            "cmds": [
+                "of",
+                "obsidian"
+            ]
+        },
+        {
+            "code": "obsidian_setting",
+            "explain": "Obsidian 设置",
+            "cmds": [
+                "ofsetting"
+            ]
+        }
     ]
-  }
+}
