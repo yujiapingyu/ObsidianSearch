@@ -23,6 +23,7 @@ const buildNoteCache = () => {
   noteCache = {}; // 重置缓存
   walkDir(rootPath, function (filePath) {
     if (filePath.endsWith(".md")) {
+      const fileMTime = fs.statSync(filePath).mtimeMs;
       const relativePath = filePath.substring(rootPath.length + 1);
       const pathParts = relativePath.split(path.sep);
       const vaultName = pathParts[0];
@@ -41,6 +42,7 @@ const buildNoteCache = () => {
             lineNumber: index + 1, // 行号从1开始
             path: notePath,
             vault: vaultName,
+            mtime: fileMTime
           };
           if (!noteCache[vaultName]) noteCache[vaultName] = [];
           noteCache[vaultName].push(noteDescObj);
@@ -62,7 +64,7 @@ const searchNotes = (searchWord) => {
           results.push({
             title: `标题: ${note.title}`,
             description: `Vault: ${note.vault}`,
-            icon: 'title.png', // 为标题匹配指定一个图标
+            icon: 'resource/title.png', // 为标题匹配指定一个图标
             filepath: note.path,
             vault: note.vault,
             lineNumber: 0 // 标题匹配没有具体行号
@@ -77,7 +79,7 @@ const searchNotes = (searchWord) => {
           results.push({
             title: contentTitle,
             description: note.line,
-            icon: 'content.png', // 为内容匹配指定一个不同的图标
+            icon: 'resource/content.png', // 为内容匹配指定一个不同的图标
             filepath: note.path,
             vault: note.vault,
             lineNumber: note.lineNumber
@@ -91,8 +93,32 @@ const searchNotes = (searchWord) => {
   return results;
 };
 
-
-
+const recentNotes = (num) => {
+  // 返回最近修改的笔记
+  let recentNotes = [];
+  Object.keys(noteCache).forEach(vaultName => {
+    let titlesAdded = {};
+    noteCache[vaultName].forEach(note => {
+      if (!titlesAdded[note.title]) {
+        titlesAdded[note.title] = true;
+        recentNotes.push(note);
+      }
+    });
+  });
+  recentNotes.sort((a, b) => b.mtime - a.mtime); // 根据修改时间排序
+  recentNotes = recentNotes.slice(0, num); // 只返回最近num个
+  recentNotes = recentNotes.map(note => {
+    return {
+      title: note.title,
+      description: note.line,
+      icon: 'resource/recent.png', // 为最近修改的笔记指定一个图标
+      filepath: note.path,
+      vault: note.vault,
+      lineNumber: note.lineNumber
+    };
+  });
+  return recentNotes;
+};
 
 window.exports = {
   obsidian_search: {
@@ -105,6 +131,7 @@ window.exports = {
         if (rootPathSetting) {
           rootPath = rootPathSetting.data;
           buildNoteCache(); // 构造noteCache
+          return callbackSetList(recentNotes(10));
         } else {
           console.log("Obsidian root path not set...");
         }
