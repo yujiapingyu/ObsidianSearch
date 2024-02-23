@@ -3,8 +3,8 @@ const fs = require("fs");
 const { shell } = require("electron");
 const { pinyin } = require("pinyin-pro");
 
-let rootPathSetting = window.utools.db.get("obsidianRootPath");
-let rootPath = rootPathSetting ? rootPathSetting.data : "";
+const ROOT_PATH_KEY = "configRootPath";
+let configRootPath = utools.dbStorage.getItem(ROOT_PATH_KEY);
 let noteCache = {};
 
 const sentanceToPinyin = (sentance) => {
@@ -21,10 +21,10 @@ const walkDir = (dir, callback) => {
 
 const buildNoteCache = () => {
   noteCache = {}; // 重置缓存
-  walkDir(rootPath, function (filePath) {
+  walkDir(configRootPath, function (filePath) {
     if (filePath.endsWith(".md")) {
       const fileMTime = fs.statSync(filePath).mtimeMs;
-      const relativePath = filePath.substring(rootPath.length + 1);
+      const relativePath = filePath.substring(configRootPath.length + 1);
       const pathParts = relativePath.split(path.sep);
       const vaultName = pathParts[0];
       const notePath = pathParts.slice(1).join("/");
@@ -126,51 +126,35 @@ window.exports = {
     args: {
       enter: (action, callbackSetList) => {
         console.log("enter", action);
-        rootPathSetting = window.utools.db.get("obsidianRootPath");
-        console.log("rootPathSetting", rootPathSetting);
-        if (rootPathSetting) {
-          rootPath = rootPathSetting.data;
-          buildNoteCache(); // 构造noteCache
-          return callbackSetList(recentNotes(10));
-        } else {
-          console.log("Obsidian root path not set...");
-        }
-        
+        configRootPath = window.utools.dbStorage.getItem(ROOT_PATH_KEY);
+        console.log("configRootPath", configRootPath);
+        if (!configRootPath) {
+          return callbackSetList([{
+            title: "Obsidian root path尚未设置",
+            description: '请先使用关键词ofsetting进行设置',
+          }]);
+        } 
+        buildNoteCache(); // 构造noteCache
+        return callbackSetList(recentNotes(10));
       },
       search: (action, searchWord, callbackSetList) => {
-        rootPathSetting = window.utools.db.get("obsidianRootPath");
-        if (!rootPathSetting) {
-          return callbackSetList([{
-            title: "Obsidian root path尚未设置，将设置如下：",
-            description: searchWord,
-          }]);
-        } else {
-          rootPath = rootPathSetting.data;
-          buildNoteCache();
+        configRootPath = window.utools.dbStorage.getItem(ROOT_PATH_KEY);
+        if (!configRootPath) {
+          if (!configRootPath) {
+            return callbackSetList([{
+              title: "Obsidian root path尚未设置，无法进行搜索",
+              description: '请先使用关键词ofsetting进行设置',
+            }]);
+          } 
         }
         if (!searchWord) return callbackSetList([]);
         const searchResults = searchNotes(searchWord);
         return callbackSetList(searchResults);
       },
       select: (action, itemData) => {
-        rootPathSetting = window.utools.db.get("obsidianRootPath");
-        if (!rootPathSetting) {
-          var path = itemData.description;
-          const data = {
-              _id: 'obsidianRootPath', // 使用唯一标识符作为_id
-              data: path, // 实际保存的数据
-              _rev: undefined // 初始时不知道_rev
-          };
-
-          const result = window.utools.db.put(data);
-          console.log(result); // 输出结果，通常包含ok: true和新的_rev
-
-          window.utools.outPlugin();
-          
+        configRootPath = window.utools.dbStorage.getItem(ROOT_PATH_KEY);
+        if (!configRootPath) {
           return;
-        } else {
-          rootPath = rootPathSetting.data;
-          buildNoteCache();
         }
         window.utools.hideMainWindow();
         // 构建包含行号的Obsidian URI
@@ -191,10 +175,18 @@ window.exports = {
     args: {
       enter: (action, callbackSetList) => {
         console.log("enter", action);
-        rootPathSetting = window.utools.db.get("obsidianRootPath");
-        console.log("rootPathSetting", rootPathSetting);
-        if (!rootPathSetting) {
-          console.log("Obsidian root path尚未设置");
+        configRootPath = window.utools.dbStorage.getItem(ROOT_PATH_KEY);
+        console.log("configRootPath", configRootPath);
+        if (!configRootPath) {
+          return callbackSetList([{
+            title: "Obsidian root path尚未设置",
+            description: '请输入root path，如：/Users/username/Dropbox/obsidian',
+          }]);
+        } else {
+          return callbackSetList([{
+            title: "Obsidian root path已设置为：" + configRootPath,
+            description: "输入新的路径可以重新进行设置",
+          }]);
         }
       },
       search: (action, searchWord, callbackSetList) => {
@@ -205,25 +197,10 @@ window.exports = {
       },
       select: (action, itemData) => {
         var path = itemData.description;
-        const data = {
-            _id: 'obsidianRootPath', // 使用唯一标识符作为_id
-            data: path, // 实际保存的数据
-            _rev: undefined // 初始时不知道_rev
-        };
-
-        const existing = window.utools.db.get(data._id);
-        if (existing) {
-            data._rev = existing._rev; // 如果已存在，使用现有的_rev
+        if (path) {
+          window.utools.dbStorage.setItem(ROOT_PATH_KEY, path);
+          window.utools.showNotification("Obsidian root path已设置为：" + path);
         }
-
-        const result = window.utools.db.put(data);
-        console.log(result); // 输出结果，通常包含ok: true和新的_rev
-        if (result.ok) {
-          window.utools.showNotification("Obsidian root path设置成功");
-        } else {
-          window.utools.showNotification("Obsidian root path设置失败");
-        }
-
         window.utools.outPlugin();
       },
     },
