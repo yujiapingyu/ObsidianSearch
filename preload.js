@@ -1,10 +1,15 @@
 const path = require("path");
 const fs = require("fs");
 const { shell } = require("electron");
+const { pinyin } = require("pinyin-pro");
 
 let rootPathSetting = window.utools.db.get("obsidianRootPath");
 let rootPath = rootPathSetting ? rootPathSetting.data : "";
 let noteCache = {};
+
+const sentanceToPinyin = (sentance) => {
+  return pinyin(sentance, { toneType: 'none', type: 'array' }).join('');
+};
 
 const walkDir = (dir, callback) => {
   fs.readdirSync(dir).forEach((f) => {
@@ -52,7 +57,7 @@ const searchNotes = (searchWord) => {
   Object.keys(noteCache).forEach(vaultName => {
     noteCache[vaultName].forEach(note => {
       // 标题匹配
-      if (note.title.toLowerCase().includes(searchWord.toLowerCase())) {
+      if (note.title.toLowerCase().includes(searchWord.toLowerCase()) || sentanceToPinyin(note.title).includes(searchWord.toLowerCase())) {
         if (!titlesAdded[note.title]) { // 检查这个标题是否已被添加
           results.push({
             title: `标题: ${note.title}`,
@@ -66,7 +71,7 @@ const searchNotes = (searchWord) => {
         }
       }
       // 内容匹配
-      if (note.line && note.line.toLowerCase().includes(searchWord.toLowerCase())) {
+      if (note.line && (note.line.toLowerCase().includes(searchWord.toLowerCase()) || sentanceToPinyin(note.line).includes(searchWord.toLowerCase()))) {
         const contentTitle = `内容: ${note.title} - Line ${note.lineNumber}`;
         if (!titlesAdded[contentTitle]) { // 检查内容匹配的标题是否已被添加
           results.push({
@@ -85,6 +90,8 @@ const searchNotes = (searchWord) => {
 
   return results;
 };
+
+
 
 
 window.exports = {
