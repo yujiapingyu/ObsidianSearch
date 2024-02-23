@@ -197,6 +197,11 @@ window.exports = {
       },
       select: (action, itemData) => {
         var path = itemData.description;
+        // 检查是否为合法路径
+        if (!fs.existsSync(path)) {
+          window.utools.showNotification("路径不存在，请重新输入");
+          return;
+        }
         if (path) {
           window.utools.dbStorage.setItem(ROOT_PATH_KEY, path);
           window.utools.showNotification("Obsidian root path已设置为：" + path);
