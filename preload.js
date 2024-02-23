@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const { shell } = require("electron");
 const { pinyin } = require("pinyin-pro");
 
 const ROOT_PATH_KEY = "configRootPath";
@@ -163,9 +162,8 @@ window.exports = {
         )}&filepath=${encodeURIComponent(itemData.filepath)}&line=${
           itemData.lineNumber
         }&openmode=true`;
-        shell.openExternal(obsidianUri).then(() => {
-          window.utools.outPlugin();
-        });
+        window.utools.shellOpenExternal(obsidianUri);
+        window.utools.outPlugin();
       },
       placeholder: "输入关键词检索文档，支持拼音"
     },
