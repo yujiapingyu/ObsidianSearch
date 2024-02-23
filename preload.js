@@ -3,6 +3,8 @@ const fs = require("fs");
 const { pinyin } = require("pinyin-pro");
 
 const ROOT_PATH_KEY = "configRootPath";
+const NOT_FOUND_DESCRIPTION = "请尝试不同的关键词";
+
 let configRootPath = utools.dbStorage.getItem(ROOT_PATH_KEY);
 let noteCache = {};
 
@@ -148,11 +150,20 @@ window.exports = {
         }
         if (!searchWord) return callbackSetList([]);
         const searchResults = searchNotes(searchWord);
+        if (searchResults.length === 0) {
+          return callbackSetList([{
+            title: `没有找到匹配关键词** ${searchWord} **的笔记`,
+            description: NOT_FOUND_DESCRIPTION,
+          }]);
+        }
         return callbackSetList(searchResults);
       },
       select: (action, itemData) => {
         configRootPath = window.utools.dbStorage.getItem(ROOT_PATH_KEY);
         if (!configRootPath) {
+          return;
+        }
+        if (itemData.description === NOT_FOUND_DESCRIPTION) {
           return;
         }
         window.utools.hideMainWindow();
